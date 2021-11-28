@@ -483,7 +483,20 @@ static char const* tr_metainfoParseImpl(
     {
         size_t blen = 0;
         char* bstr = tr_variantToStr(infoDict, TR_VARIANT_FMT_BENC, &blen);
-        tr_sha1(inf->hash, bstr, (int)blen, nullptr);
+
+        if (auto hashOverride = std::string_view{}; tr_variantDictFindStrView(meta, TR_KEY_hashOverride, &hashOverride))
+        {
+            if (hashOverride.size() != SHA_DIGEST_LENGTH)
+            {
+                return "wrong hashOverride size";
+            }
+            memcpy(inf->hash, hashOverride.data(), SHA_DIGEST_LENGTH);
+            tr_logAddInfo("%s", "Used hashOverride.");
+        }
+        else
+        {
+            tr_sha1(inf->hash, bstr, (int)blen, nullptr);
+        }
         tr_sha1_to_hex(inf->hashString, inf->hash);
 
         if (infoDictLength != nullptr)

@@ -142,6 +142,7 @@ enum
     TR_KEY_fromTracker,
     TR_KEY_hasAnnounced,
     TR_KEY_hasScraped,
+    TR_KEY_hashOverride,
     TR_KEY_hashString,
     TR_KEY_have,
     TR_KEY_haveUnchecked,
