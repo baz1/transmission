@@ -1,93 +1,30 @@
-## About
+# Transmission by parts
 
-Transmission is a fast, easy, and free BitTorrent client. It comes in several flavors:
-  * A native macOS GUI application
-  * GTK+ and Qt GUI applications for Linux, BSD, etc.
-  * A headless daemon for servers and routers
-  * A web UI for remote controlling any of the above
+This repository is a fork of https://github.com/transmission/transmission with
+the added capability to split large files into parts that can be downloaded
+separately.
 
-Visit https://transmissionbt.com/ for more information.
+Use
+[split_files.py](https://github.com/baz1/transmission/blob/master/split_files.py)
+to create copies of existing torrents with large files split into parts
+(see constant at the top for the maximum file size).
 
-## Command line interface notes
+The modified `.torrent` file that this script produces can then only be used
+with the modified transmission binary from this fork.
 
-Transmission is fully supported in transmission-remote, the preferred cli client.
+## Details
 
-Three standalone tools to examine, create, and edit .torrent files exist: transmission-show, transmission-create, and transmission-edit, respectively.
+A small change in the forked transmission binary adds an optional `hashOverride`
+entry in the torrent's bencode, which is then used instead of the hash of the
+`info` entry.
+This is needed because that infohash is used to identify the torrent with the
+tracker and peers.
 
-Prior to development of transmission-remote, the standalone client transmission-cli was created. Limited to a single torrent at a time, transmission-cli is deprecated and exists primarily to support older hardware dependent upon it. In almost all instances, transmission-remote should be used instead.
+The python script then makes use of it to be able to change the list of files
+while preserving the original infohash.
 
-Different distributions may choose to package any or all of these tools in one or more separate packages.
+Everything else works fine since the protocol does not further involve the files
+architecture in anything else than the infohash. The order of the parts just
+needs to be maintained since the pieces data corresponds to the concatenated
+file content.
 
-## Building
-
-Transmission has an Xcode project file (Transmission.xcodeproj) for building in Xcode.
-
-For a more detailed description, and dependencies, visit: https://github.com/transmission/transmission/wiki
-
-### Building a Transmission release from the command line
-
-    $ tar xf transmission-2.92.tar.xz
-    $ cd transmission-2.92
-    $ mkdir build
-    $ cd build
-    $ # Use -DCMAKE_BUILD_TYPE=RelWithDebInfo to build optimized binary.
-    $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-    $ make
-    $ sudo make install
-
-### Building Transmission from the nightly builds
-
-Download a tarball from https://build.transmissionbt.com/job/trunk-linux/ and follow the steps from the previous section.
-
-If you're new to building programs from source code, this is typically easier than building from Git.
-
-### Building Transmission from Git (first time)
-
-    $ git clone https://github.com/transmission/transmission Transmission
-    $ cd Transmission
-    $ git submodule update --init
-    $ mkdir build
-    $ cd build
-    $ # Use -DCMAKE_BUILD_TYPE=RelWithDebInfo to build optimized binary.
-    $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-    $ make
-    $ sudo make install
-
-### Building Transmission from Git (updating)
-
-    $ cd Transmission/build
-    $ make clean
-    $ git pull --rebase --prune
-    $ git submodule update
-    $ # Use -DCMAKE_BUILD_TYPE=RelWithDebInfo to build optimized binary.
-    $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-    $ make
-    $ sudo make install
-
-## Contributing
-
-### Code Style
-
-You would want to setup your editor to make use of the .clang-format file located in the root of this repository and the eslint/prettier rules in web/package.json.
-
-If for some reason you are unwilling or unable to do so, there is a shell script which you could run either directly or via docker-compose:
-
-    $ ./code_style.sh
-    or
-    $ docker-compose build --pull
-    $ docker-compose run --rm code_style
-
-## Sponsors
-
-<table>
- <tbody>
-  <tr>
-   <td align="center"><img alt="[MacStadium]" src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" height="30"/></td>
-   <td>macOS CI builds are running on a M1 Mac Mini provided by <a href="https://www.macstadium.com/opensource">MacStadium</a></td>
-  </tr>
-  <tr>
-   <td align="center"><img alt="[SignPath]" src="https://avatars.githubusercontent.com/u/34448643" height="30"/></td>
-   <td>Free code signing on Windows provided by <a href="https://signpath.io/">SignPath.io</a>, certificate by <a href="https://signpath.org/">SignPath Foundation</a></td>
-  </tr>
- </tbody>
-</table>
